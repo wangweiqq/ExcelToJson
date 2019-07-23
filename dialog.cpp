@@ -1,4 +1,4 @@
-#pragma execution_character_set("utf-8")
+﻿#pragma execution_character_set("utf-8")
 #include "dialog.h"
 #include "ui_dialog.h"
 #include <QFileDialog>
@@ -93,6 +93,9 @@ void Dialog::on_btnOpenExcel_clicked(){
 }
 int Dialog::GetFileContent(QString filename)
 {
+	if (filename.isEmpty()) {
+		return 0;
+	}
     QString Text;
     CoInitializeEx(NULL, COINIT_MULTITHREADED);
     //fileContent.clear();

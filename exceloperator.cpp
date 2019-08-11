@@ -1,24 +1,30 @@
 ﻿#pragma execution_character_set("utf-8")
 #include "exceloperator.h"
 #include <objbase.h>
-
 ExcelOperator::ExcelOperator(QObject *parent) : QObject(parent)
   , m_pExcel(NULL)
   , m_pWorksheets(NULL)
   , m_pWorkbook(NULL)
 {
+	CoInitializeEx(NULL, COINIT_MULTITHREADED);
 }
 ExcelOperator::~ExcelOperator()
 {
+    //CoUninitialize();
     close();
     qDebug()<<"ExcelOperator 退出";
 }
-
-bool ExcelOperator::open(QString path)
+//ExcelOperator* ExcelOperator::Instance() {
+//    static ExcelOperator obj;
+//    return &obj;
+//}
+bool ExcelOperator::open(QString path,bool isNew)
 {
     m_strPath = path;
     QAxObject *pWorkbooks = NULL;
-    CoInitializeEx(NULL, COINIT_MULTITHREADED);
+    if (m_pExcel) {
+        close();
+    }
     m_pExcel = new QAxObject();//new(std::nothrow) QAxObject();
     if (NULL == m_pExcel) {
         qCritical()<<"创建Excel对象失败...";
@@ -29,17 +35,36 @@ bool ExcelOperator::open(QString path)
         m_pExcel->dynamicCall("SetVisible(bool)", false); //true 表示操作文件时可见，false表示为不可见
         m_pExcel->setProperty("DisplayAlerts", false);
         pWorkbooks = m_pExcel->querySubObject("WorkBooks");
-        //pWorkbooks->dynamicCall("Add");
-        m_pExcel->dynamicCall("Open (const QString&)", m_strPath);
+        if (isNew) {
+            pWorkbooks->dynamicCall("Add");
+        }
+        else {
+            pWorkbooks->dynamicCall("Open (const QString&)", path);
+        }
         m_pWorkbook = m_pExcel->querySubObject("ActiveWorkBook");
         qDebug()<<"excel path: "<<m_strPath;
         // 获取打开的excel文件中所有的工作sheet
         m_pWorksheets = m_pWorkbook->querySubObject("WorkSheets");
+//        QAxObject *work_sheets = getSheet(1);
+//        QAxObject *used_range = work_sheets->querySubObject("UsedRange");
+//        QAxObject *rows = used_range->querySubObject("Rows");
+//        QAxObject *columns = used_range->querySubObject("Columns");
+//        int row_count = rows->property("Count").toInt();  //获取行数
+//        int col_count = columns->property("Count").toInt();  //获取列数
+//        int a = 0;
+
+
+        //QAxObject* work_sheets = work_book->querySubObject("Worksheets(int)", 1);  //Sheets也可换用WorkSheets
+        //QAxObject *work_sheet = work_book->querySubObject("Sheets(int)", 1);
+        //QAxObject *used_range = work_sheet->querySubObject("UsedRange");
+        //QAxObject *rows = used_range->querySubObject("Rows");
+        //QAxObject *columns = used_range->querySubObject("Columns");
+        //int row_count1 = rows->property("Count").toInt();  //获取行数
+        //int col_count1 = columns->property("Count").toInt();  //获取列数
     } catch (...) {
         qCritical()<<"打开文件失败...";
         return false;
     }
-
     return true;
 }
 bool ExcelOperator::save(){
@@ -129,6 +154,7 @@ QAxObject* ExcelOperator::getSheet(int index)
 {
     QAxObject* pWorkSheet = NULL;
     try {
+        //pWorkSheet = m_pWorksheets->querySubObject("Sheets(int)", index);
         pWorkSheet = m_pWorksheets->querySubObject("Item(int)", index);
     } catch (...) {
         qCritical()<<"获取sheet失败...";
@@ -151,7 +177,12 @@ int ExcelOperator::getRowsCount(QAxObject* pSheet)
 {
     int rows = 0;
     try {
-        QAxObject* pRows = getRows(pSheet);
+//        QAxObject *used_range = work_sheets->querySubObject("UsedRange");
+//        QAxObject *rows = used_range->querySubObject("Rows");
+//        int row_count = rows->property("Count").toInt();  //获取行数
+
+        QAxObject *used_range = pSheet->querySubObject("UsedRange");
+        QAxObject* pRows = getRows(used_range);
         rows = pRows->property("Count").toInt();
     } catch (...) {
         qCritical()<<"获取行数失败...";
@@ -174,7 +205,8 @@ int ExcelOperator::getColumnsCount(QAxObject* pSheet)
 {
     int columns = 0;
     try {
-        QAxObject* pColumns = getColumns(pSheet);
+        QAxObject *used_range = pSheet->querySubObject("UsedRange");
+        QAxObject* pColumns = getColumns(used_range);
         columns = pColumns->property("Count").toInt();
     } catch (...) {
         qCritical()<<"获取列数失败...";

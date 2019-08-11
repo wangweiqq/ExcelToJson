@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{45DA07C3-2B8D-37DD-A8BE-7E111C918D1D}</ProjectGuid>
+    <ProjectGuid>{8AFEC2F7-F6C2-3687-81B4-64EFD20C0D60}</ProjectGuid>
     <RootNamespace>ExcelToJson</RootNamespace>
     <Keyword>Qt4VSv1.0</Keyword>
   </PropertyGroup>

@@ -10,11 +10,13 @@
 class ExcelOperator : public QObject
 {
     Q_OBJECT
+
 public:
     explicit ExcelOperator(QObject *parent = nullptr);
+    //static ExcelOperator* Instance();
     ~ExcelOperator();
-    //打开文件
-    bool open(QString path);
+    //打开文件isNew = 是否新建Excel表（注意Excel文件不存在）
+    bool open(QString path,bool isNew = true);
     /*保存关闭文件*/
     bool save();
     //关闭文件

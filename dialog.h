@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QVector>
 #include <string>
+#include <QStandardItemModel>
+#include <QItemSelectionModel>
 using namespace std;
 namespace Ui {
 class Dialog;
@@ -17,11 +19,13 @@ public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
     //bool xlsReader(QString excelPath,vector<string> &stuNames);
-    int GetFileContent(QString filename);
+    void GetFileContent(QString filename);
 public slots:
     void on_btnOpenExcel_clicked();
 private:
     Ui::Dialog *ui;
+    QStandardItemModel* pModel;
+    QItemSelectionModel* pSelection;
 };
 
 #endif // DIALOG_H

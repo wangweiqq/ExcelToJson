@@ -26,6 +26,8 @@ private:
     Ui::Dialog *ui;
     QStandardItemModel* pModel;
     QItemSelectionModel* pSelection;
+	//当前对话框状态：true，新建，false，插入
+	bool isState = true;
 };
 
 #endif // DIALOG_H

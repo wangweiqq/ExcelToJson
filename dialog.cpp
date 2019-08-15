@@ -21,7 +21,7 @@ Dialog::Dialog(QWidget *parent) :
     pSelection = new QItemSelectionModel(pModel);
     ui->tableView->setModel(pModel);
     ui->tableView->setSelectionModel(pSelection);
-    pModel->setHorizontalHeaderLabels(QStringList() << "孔名称" << "X" << "Y" << "Z" << "+TOL" << "-TOL" << "R" << "+TOL" << "-TOL");
+    pModel->setHorizontalHeaderLabels(QStringList() << "孔名称" << "X" << "Y" << "TOL" << "diam" << "+TOL" << "-TOL");
     ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //ui->tableView->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     //tableView->horizontalHeader()->setMinimumSectionSize(100);
@@ -38,7 +38,7 @@ void Dialog::on_btnOpenExcel_clicked(){
         return;
     }
     pModel->clear();
-    pModel->setHorizontalHeaderLabels(QStringList() << "孔名称" << "X" << "Y" << "Z" << "+TOL" << "-TOL" << "R" << "+TOL" << "-TOL");
+    pModel->setHorizontalHeaderLabels(QStringList() << "孔名称" << "X" << "Y" << "TOL" << "diam" << "+TOL" << "-TOL");
     
     qDebug()<<excelPath;
     GetFileContent(excelPath);
@@ -85,27 +85,19 @@ void Dialog::GetFileContent(QString filename)
          if (!ok) {
              Y = NAN;
          }
-         double Z = readExcel.getCell(pWorkSheet, i, 4).toDouble(&ok);
+         double TOL = readExcel.getCell(pWorkSheet, i, 4).toDouble(&ok);
          if (!ok) {
-             Z = NAN;
+             TOL = NAN;
          }
-         double TOL1 = readExcel.getCell(pWorkSheet, i, 5).toDouble(&ok);
+         double diam = readExcel.getCell(pWorkSheet, i, 5).toDouble(&ok);
          if (!ok) {
-             TOL1 = NAN;
+			 diam = NAN;
          }
-         double TOL2 = readExcel.getCell(pWorkSheet, i, 6).toDouble(&ok);
-         if (!ok) {
-             TOL2 = NAN;
-         }
-         double R = readExcel.getCell(pWorkSheet, i, 7).toDouble(&ok);
-         if (!ok) {
-             X = NAN;
-         }
-         double RTOL1 = readExcel.getCell(pWorkSheet, i, 8).toDouble(&ok);
+         double RTOL1 = readExcel.getCell(pWorkSheet, i, 6).toDouble(&ok);
          if (!ok) {
              RTOL1 = NAN;
          }
-         double RTOL2 = readExcel.getCell(pWorkSheet, i, 9).toDouble(&ok);
+         double RTOL2 = readExcel.getCell(pWorkSheet, i, 7).toDouble(&ok);
          if (!ok) {
              RTOL2 = NAN;
          }
@@ -114,12 +106,10 @@ void Dialog::GetFileContent(QString filename)
          pModel->setItem(row, 0, new QStandardItem(name));
          pModel->setItem(row, 1, new QStandardItem(QString("%1").arg(X)));
          pModel->setItem(row, 2, new QStandardItem(QString("%1").arg(Y)));
-         pModel->setItem(row, 3, new QStandardItem(QString("%1").arg(Z)));
-         pModel->setItem(row, 4, new QStandardItem(QString("%1").arg(TOL1)));
-         pModel->setItem(row, 5, new QStandardItem(QString("%1").arg(TOL2)));
-         pModel->setItem(row, 6, new QStandardItem(QString("%1").arg(R)));
-         pModel->setItem(row, 7, new QStandardItem(QString("%1").arg(RTOL1)));
-         pModel->setItem(row, 8, new QStandardItem(QString("%1").arg(RTOL2)));
+         pModel->setItem(row, 3, new QStandardItem(QString("%1").arg(TOL)));
+         pModel->setItem(row, 4, new QStandardItem(QString("%1").arg(diam)));
+         pModel->setItem(row, 5, new QStandardItem(QString("%1").arg(RTOL1)));
+         pModel->setItem(row, 6, new QStandardItem(QString("%1").arg(RTOL2)));
 
         QJsonObject obj1;	
         QJsonObject obj2;
@@ -127,10 +117,8 @@ void Dialog::GetFileContent(QString filename)
         obj1.insert("index", i - 2);
         obj1.insert("x", X);
         obj1.insert("y", Y);
-        obj1.insert("z", Z);
-        obj1.insert("TOL+", TOL1);
-        obj1.insert("TOL-", TOL2);
-        obj1.insert("R", R);
+        obj1.insert("TOL", TOL);
+        obj1.insert("diam", diam);
         obj1.insert("RTOL+", RTOL1);
         obj1.insert("RTOL-", RTOL2);
         jsonArr1.append(obj1);
@@ -139,8 +127,7 @@ void Dialog::GetFileContent(QString filename)
         obj2.insert("index", i - 2);
         obj2.insert("x", X);
         obj2.insert("y", Y);
-        obj2.insert("z", Z);
-        obj2.insert("R", R);
+        obj2.insert("diam", diam);
         jsonArr2.append(obj2);
     }
     readExcel.close();
